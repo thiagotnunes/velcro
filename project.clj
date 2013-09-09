@@ -1,4 +1,4 @@
-(defproject velcro "0.0.1"
+(defproject velcro "0.0.2"
   :description "A little less pain in zipper replacement"
   :url "http://www.thiagotnunes.com"
   :license {:name "Eclipse Public License"
