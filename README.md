@@ -4,14 +4,19 @@ Making working with zippers a little bit less painful.
 
 ## Usage
 
+Include this in your project.clj:
+
+```clojure
+[velcro "0.0.1"]
+```
 
 Velcro should be used for replacing elements within a form:
 
-```
+```clojure
 (ns my-ns
   (:require
     [velcro.core :refer :all]))
-    
+
 (replace-in '(1 + 2)
             [current-node]
             (by (fn [_] '-))
