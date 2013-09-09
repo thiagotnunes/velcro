@@ -14,7 +14,9 @@
       zip/remove))
 
 (defn- insert-current [form node]
-  (zip/replace form node))
+  (-> form
+      (zip/insert-left node)
+      zip/remove))
 
 (defn- insert-left [form node]
   (-> form

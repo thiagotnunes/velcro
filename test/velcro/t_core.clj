@@ -21,7 +21,13 @@
     (replace-in '(1 + 2)
                 [right-node]
                 (by dec)
-                (where #(= (current-node %) '+))) => '(1 + 1)))
+                (where #(= (current-node %) '+))) => '(1 + 1))
+
+  (fact "prevents infinite recursion"
+    (replace-in '(1 + 2)
+                [current-node]
+                (by (fn [_] (list 3 4 '+)))
+                (where #(= (current-node %) '+)))))
 
 (facts "about 2 nodes replacement"
   (fact "replaces left node and current node by the given one"
