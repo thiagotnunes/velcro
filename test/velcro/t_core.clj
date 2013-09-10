@@ -90,3 +90,11 @@
                 [current-node left-node right-node]
                 (by (fn [_ actual expected] (list '= actual expected)))
                 (where #(= (current-node %) '->))) => '(test "testing" (= 1 2))))
+
+
+(facts "about spliced"
+  (fact "current node"
+    (replace-in '(here)
+                [current-node]
+                (by-spliced (fn [_] '(first-statement second-statement)))
+                (where #(= (current-node %) 'here))) => '(first-statement second-statement)))

@@ -49,7 +49,21 @@
 
 (defn by [func]
   (fn [nodes]
-     (apply func nodes)))
+    (fn [form insert-fn]
+      (let [replacement (apply func nodes)]
+        (insert-fn form replacement)))))
+
+(defn append-to [form nodes]
+  (if (seq nodes)
+    (recur (insert-right form (first nodes)) (rest nodes))
+    form))
+
+(defn by-spliced [func]
+  (fn [nodes]
+    (fn [form insert-fn]
+      (let [replacement (apply func nodes)]
+        (append-to (insert-fn form (first replacement))
+                   (rest replacement))))))
 
 (defn where [fn]
   fn)
@@ -62,13 +76,13 @@
                        (apply comp))]
     (remove-fn form)))
 
-(defn- insert-node [form replacement nodes-fn]
+(defn- insert-node [form replacement-fn nodes-fn]
   (let [insert-fn (->> nodes-fn
                        (map #(node-fn-mapping %))
                        (sort-by :order)
                        (map :insert-fn)
                        last)]
-    (insert-fn form replacement)))
+    (replacement-fn form insert-fn)))
 
 (defn replace-in [form nodes-fn by-fn where-fn]
   (letfn [(replace-in-form [form]
@@ -76,10 +90,10 @@
               form
               (if (where-fn form)
                 (let [nodes ((apply juxt nodes-fn) form)
-                      replacement (by-fn nodes)]
+                      replacement-fn (by-fn nodes)]
                   (recur (-> form
                              (remove-nodes nodes-fn)
-                             (insert-node replacement nodes-fn)
+                             (insert-node replacement-fn nodes-fn)
                              zip/next)))
                 (recur (zip/next form)))))]
     (-> form
