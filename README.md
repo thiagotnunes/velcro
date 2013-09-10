@@ -42,6 +42,16 @@ Velcro should be used for replacing elements within a form:
 ; => '(test "testing the function" (= 1 2))
 ```
 
+You can also splice the result of your function:
+
+```clojure
+(replace-in '(my-funky-let [a 1 b 2] (+ a b))
+            [current-node right-node]
+            (by-spliced (fn [_ let-body] (list 'let let-body)))
+            (where #(= (current-node %) 'my-funky-let)))
+; => '(let [a 1 b 2] (+ a b))
+```
+
 ## License
 
 (The MIT License)
