@@ -20,8 +20,7 @@
 
 (defn- insert-left [form node]
   (-> form
-      (zip/insert-left node)
-      zip/next))
+      (zip/insert-left node)))
 
 (defn- insert-right [form node]
   (-> form
@@ -39,31 +38,35 @@
 
 (def node-fn-mapping {left-node    {:order 0
                                     :remove-fn remove-left
-                                    :insert-fn insert-left}
+                                    :insert-fns {:head insert-left
+                                                 :tail insert-left}}
                       right-node   {:order 1
                                     :remove-fn remove-right
-                                    :insert-fn insert-right}
+                                    :insert-fns {:head insert-right
+                                                 :tail insert-right}}
                       current-node {:order 2
                                     :remove-fn identity
-                                    :insert-fn insert-current}})
+                                    :insert-fns {:head insert-current
+                                                 :tail insert-right}}})
 
 (defn by [func]
   (fn [nodes]
-    (fn [form insert-fn]
+    (fn [form {head-fn :head}]
       (let [replacement (apply func nodes)]
-        (insert-fn form replacement)))))
+        (head-fn form replacement)))))
 
-(defn append-to [form nodes]
+(defn append-to [form nodes insert-fn]
   (if (seq nodes)
-    (recur (insert-right form (first nodes)) (rest nodes))
+    (recur (insert-fn form (first nodes)) (rest nodes) insert-fn)
     form))
 
 (defn by-spliced [func]
   (fn [nodes]
-    (fn [form insert-fn]
+    (fn [form {head-fn :head tail-fn :tail}]
       (let [replacement (apply func nodes)]
-        (append-to (insert-fn form (first replacement))
-                   (rest replacement))))))
+        (append-to (head-fn form (first replacement))
+                   (rest replacement)
+                   tail-fn)))))
 
 (defn where [fn]
   fn)
@@ -80,7 +83,7 @@
   (let [insert-fn (->> nodes-fn
                        (map #(node-fn-mapping %))
                        (sort-by :order)
-                       (map :insert-fn)
+                       (map :insert-fns)
                        last)]
     (replacement-fn form insert-fn)))
 
