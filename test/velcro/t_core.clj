@@ -116,3 +116,10 @@
                 [current-node right-node]
                 (by-spliced (fn [_ body] (list 'let body)))
                 (where #(= (current-node %) 'my-let))) => '(let [a 1 b 2] (+ a b))))
+
+(facts "about up node"
+  (fact "replaces up node by the given one"
+    (replace-in '((println "begin") (my-let [a 1 b 2] (+ a b)) (println "done"))
+                [up-node]
+                (by (fn [form] `(let ~(second form) ~(first (drop 2 form)) (println "wrapped"))))
+                (where #(= (current-node %) 'my-let))) => '((println "begin") (clojure.core/let [a 1 b 2] (+ a b) (clojure.core/println "wrapped")) (println "done"))))

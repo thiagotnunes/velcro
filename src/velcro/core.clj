@@ -27,6 +27,12 @@
       (zip/insert-right node)
       zip/next))
 
+(defn- insert-up [form node]
+  (-> form
+      zip/up
+      (zip/insert-left node)
+      zip/remove))
+
 (defn left-node [form]
   (-> form zip/left zip/node))
 
@@ -35,6 +41,9 @@
 
 (defn current-node [form]
   (zip/node form))
+
+(defn up-node [form]
+  (-> form zip/up zip/node))
 
 (def node-fn-mapping {left-node    {:order 0
                                     :remove-fn remove-left
@@ -47,6 +56,10 @@
                       current-node {:order 2
                                     :remove-fn identity
                                     :insert-fns {:head insert-current
+                                                 :tail insert-right}}
+                      up-node      {:order 3
+                                    :remove-fn identity
+                                    :insert-fns {:head insert-up
                                                  :tail insert-right}}})
 
 (defn by [func]
