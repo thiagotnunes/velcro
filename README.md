@@ -40,6 +40,12 @@ Velcro should be used for replacing elements within a form:
             (by (fn [actual _ expected] (list '= actual expected)))
             (where #(= (current-node %) '->)))
 ; => '(test "testing the function" (= 1 2))
+
+(replace-in '((println "begin") (my-let [a 1 b 2] (+ a b)) (println "done"))
+            [up-node]
+            (by (ƒ [form] `(let ~(second form) ~(first (drop 2 form)) (println "wrapped"))))
+            (where #(= (current-node %) 'my-let)))
+; => '((println "begin") (clojure.core/let [a 1 b 2] (+ a b) (clojure.core/println "wrapped")) (println "done"))
 ```
 
 You can also splice the result of your function:
