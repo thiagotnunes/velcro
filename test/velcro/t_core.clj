@@ -91,32 +91,6 @@
                 (by (fn [_ actual expected] (list '= actual expected)))
                 (where #(= (current-node %) '->))) => '(test "testing" (= 1 2))))
 
-
-(facts "about spliced"
-  (fact "current node"
-    (replace-in '(here)
-                [current-node]
-                (by-spliced (fn [_] '(first-statement second-statement)))
-                (where #(= (current-node %) 'here))) => '(first-statement second-statement))
-
-  (fact "left node"
-    (replace-in '(here there)
-                [left-node]
-                (by-spliced (fn [_] '(first-statement second-statement)))
-                (where #(= (current-node %) 'there))) => '(first-statement second-statement there))
-
-  (fact "left node"
-    (replace-in '(here there)
-                [right-node]
-                (by-spliced (fn [_] '(first-statement second-statement)))
-                (where #(= (current-node %) 'here))) => '(here first-statement second-statement))
-
-  (fact "replaces current and right nodes by the given one"
-    (replace-in '(my-let [a 1 b 2] (+ a b))
-                [current-node right-node]
-                (by-spliced (fn [_ body] (list 'let body)))
-                (where #(= (current-node %) 'my-let))) => '(let [a 1 b 2] (+ a b))))
-
 (facts "about up node"
   (fact "replaces up node by the given one"
     (replace-in '((println "begin") (my-let [a 1 b 2] (+ a b)) (println "done"))

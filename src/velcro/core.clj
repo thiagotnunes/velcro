@@ -47,39 +47,27 @@
 
 (def node-fn-mapping {left-node    {:order 0
                                     :remove-fn remove-left
-                                    :insert-fns {:head insert-left
-                                                 :tail insert-left}}
+                                    :insert-fn insert-left}
                       right-node   {:order 1
                                     :remove-fn remove-right
-                                    :insert-fns {:head insert-right
-                                                 :tail insert-right}}
+                                    :insert-fn insert-right}
                       current-node {:order 2
                                     :remove-fn identity
-                                    :insert-fns {:head insert-current
-                                                 :tail insert-right}}
+                                    :insert-fn insert-current}
                       up-node      {:order 3
                                     :remove-fn identity
-                                    :insert-fns {:head insert-up
-                                                 :tail insert-right}}})
+                                    :insert-fn insert-up}})
 
 (defn by [func]
   (fn [nodes]
-    (fn [form {head-fn :head}]
+    (fn [form insert-fn]
       (let [replacement (apply func nodes)]
-        (head-fn form replacement)))))
+        (insert-fn form replacement)))))
 
 (defn append-to [form nodes insert-fn]
   (if (seq nodes)
     (recur (insert-fn form (first nodes)) (rest nodes) insert-fn)
     form))
-
-(defn by-spliced [func]
-  (fn [nodes]
-    (fn [form {head-fn :head tail-fn :tail}]
-      (let [replacement (apply func nodes)]
-        (append-to (head-fn form (first replacement))
-                   (rest replacement)
-                   tail-fn)))))
 
 (defn where [fn]
   fn)
@@ -96,7 +84,7 @@
   (let [insert-fn (->> nodes-fn
                        (map #(node-fn-mapping %))
                        (sort-by :order)
-                       (map :insert-fns)
+                       (map :insert-fn)
                        last)]
     (replacement-fn form insert-fn)))
 
